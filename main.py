@@ -35,6 +35,12 @@ def main() -> None:
     OUT.write_bytes(data)
     if _sha256(OUT.read_bytes()) != _sha256(data):
         raise SystemExit("entry.txt write mismatch: output bytes differ from source")
+    # Second verification layer: compare the written text exactly
+    # against the source line, so any text-level drift (e.g. a
+    # stray newline or encoding change that somehow survived the
+    # byte check) also fails loudly instead of shipping.
+    if OUT.read_text(encoding="utf-8") != line:
+        raise SystemExit("entry.txt content mismatch: output text differs from source")
 
 
 if __name__ == "__main__":
